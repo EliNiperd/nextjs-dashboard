@@ -18,12 +18,12 @@ export async function fetchRevenue() {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
 
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+     //console.log('Fetching revenue data...', Date.now());
+     //await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const data = await sql<Revenue>`SELECT * FROM revenue`;
 
-    // console.log('Data fetch completed after 3 seconds.');
+    //console.log('Data fetch revenue completed after 3 seconds.', Date.now());
 
     return data.rows;
   } catch (error) {
@@ -34,18 +34,20 @@ export async function fetchRevenue() {
 
 export async function fetchLatestInvoices() {
   try {
+    //console.log('Fetching LastestInvoice data...', Date.now());
+    //await new Promise((resolve) => setTimeout(resolve, 3000));
     const data = await sql<LatestInvoiceRaw>`
       SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id
       ORDER BY invoices.date DESC
       LIMIT 5`;
-
+    //console.log('Data fetch LastestInvoice completed after 3 seconds.', Date.now().toString());
     const latestInvoices = data.rows.map((invoice) => ({
       ...invoice,
       amount: formatCurrency(invoice.amount),
     }));
-    return latestInvoices;
+    return latestInvoices;  
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch the latest invoices.');
@@ -57,6 +59,8 @@ export async function fetchCardData() {
     // You can probably combine these into a single SQL query
     // However, we are intentionally splitting them to demonstrate
     // how to initialize multiple queries in parallel with JS.
+    console.log('Fetching Card data...', Date.now());
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
     const invoiceStatusPromise = sql`SELECT
@@ -69,7 +73,7 @@ export async function fetchCardData() {
       customerCountPromise,
       invoiceStatusPromise,
     ]);
-
+    console.log('Data fetch Card completed after 3 seconds.', Date.now().toString());
     const numberOfInvoices = Number(data[0].rows[0].count ?? '0');
     const numberOfCustomers = Number(data[1].rows[0].count ?? '0');
     const totalPaidInvoices = formatCurrency(data[2].rows[0].paid ?? '0');
